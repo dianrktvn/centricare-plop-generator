@@ -1,6 +1,6 @@
 {
-  "name": "@centricare/plop-feature-generator",
-  "version": "1.0.0",
+  "name": "@dianrktvn/plop-feature-generator",
+  "version": "1.0.1",
   "description": "Plop generator for Cloud HIS features",
   "type": "module",
   "bin": {

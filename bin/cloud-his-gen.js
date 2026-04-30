@@ -8,7 +8,7 @@ const plopfile = join(__dirname, "../plopfile.js");
 const args = process.argv.slice(2).join(" ");
 
 try {
-  execSync(`npx plop --plopfile "${plopfile}" ${args}`, { stdio: "inherit" });
+  execSync(`npx plop --plopfile "${plopfile}" --dest "${process.cwd()}" ${args}`, { stdio: "inherit" });
 } catch (error) {
   process.exit(1);
 }

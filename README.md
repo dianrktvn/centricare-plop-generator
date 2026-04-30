@@ -1,13 +1,13 @@
-# @centricare/plop-feature-generator
+# @dianrktvn/plop-feature-generator
 
-A standardized Plop generator for creating Centricare Cloud HIS feature modules and core libraries.
+A standardized Plop generator for creating Centricare HIS feature modules and core libraries.
 
 ## Installation
 
 You can install this package as a development dependency in your project:
 
 ```bash
-npm install -D @centricare/plop-feature-generator
+npm install -D @dianrktvn/plop-feature-generator
 ```
 
 ## Usage
