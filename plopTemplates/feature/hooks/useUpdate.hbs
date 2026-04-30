@@ -1,0 +1,11 @@
+import { createMutation } from "../../../lib";
+import { update{{pascalCase name}} } from "../api/update{{pascalCase name}}";
+
+export const useUpdate{{pascalCase name}} = createMutation(
+  update{{pascalCase name}},
+  [["{{camelCase name}}s"]],
+  {
+    method: "PATCH",
+    url: "/{{camelCase name}}s",
+  }
+);

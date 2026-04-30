@@ -1,0 +1,51 @@
+import { useState } from "react";
+import { useForm } from "@mantine/form";
+import { IPaginationMetadataType } from "../../../lib";
+import {
+  I{{pascalCase name}}sResponse,
+  ICreate{{pascalCase name}}Payload,
+} from "../types/{{camelCase name}}.types";
+
+export function use{{pascalCase name}}State() {
+  const [limit, setLimit] = useState<number | undefined>(10);
+  const [offset, setOffset] = useState(0);
+  const [search, setSearch] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string | null>(null);
+  const [data, setData] = useState<I{{pascalCase name}}sResponse[]>([]);
+  const [metadata, setMetadata] = useState<IPaginationMetadataType>({
+    current_page: 1,
+    next: null,
+    previous: null,
+    total_pages: 1,
+    total_records: 0,
+  });
+
+  const formFilter = useForm<any>({
+    initialValues: {
+      status: null,
+    },
+  });
+
+  const formCreate{{pascalCase name}} = useForm<ICreate{{pascalCase name}}Payload>({
+    initialValues: {
+      name: "",
+    },
+  });
+
+  return {
+    limit,
+    offset,
+    search,
+    filter,
+    setLimit,
+    setOffset,
+    setSearch,
+    setFilter,
+    data,
+    setData,
+    metadata,
+    setMetadata,
+    formFilter,
+    formCreate{{pascalCase name}},
+  };
+}

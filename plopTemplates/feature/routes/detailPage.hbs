@@ -1,0 +1,133 @@
+import { useEffect, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
+import { LoadingOverlay, Loader, Text } from "@mantine/core";
+import useAppRoute from "../../../config/appRoute";
+import { useAccessControl } from "../../../hooks/checkAuthRules/useAccessControl";
+import DetailLayout from "../../../layouts/DetailLayout";
+import { IBreadCrumbsProps } from "../../../layouts/DetailLayout/types";
+import { I{{pascalCase name}}sResponse } from "../types/{{camelCase name}}.types";
+import { useGet{{pascalCase name}}ById } from "../hooks/useGet{{pascalCase name}}ById";
+import { useUpdate{{pascalCase name}} } from "../hooks/useUpdate{{pascalCase name}}";
+import { use{{pascalCase name}}State } from "../states/use{{pascalCase name}}State";
+
+function Detail{{pascalCase name}}() {
+  const intl = useIntl();
+  const { go, location } = useAppRoute();
+  const { hasAccess } = useAccessControl();
+  const { formCreate{{pascalCase name}} } = use{{pascalCase name}}State();
+  const update{{pascalCase name}} = useUpdate{{pascalCase name}}();
+
+  const [pageUrl, setPageUrl] = useState<any>(null);
+
+  // ── Breadcrumbs ────────────────────────────────────
+  const crumbItems: IBreadCrumbsProps[] = [
+    {
+      label: intl.formatMessage({ defaultMessage: "Dashboard", id: "dashboard" }),
+      onClick: () => go("/"),
+    },
+    {
+      label: intl.formatMessage({
+        defaultMessage: "{{titleCase name}}",
+        id: "{{camelCase name}}",
+      }),
+      onClick: () => go("/{{dashCase name}}"),
+    },
+    {
+      label: intl.formatMessage({
+        defaultMessage: "Detail {{titleCase name}}",
+        id: "detail{{pascalCase name}}",
+      }),
+      onClick: () => {},
+    },
+  ];
+
+  // ── Data fetching ──────────────────────────────────
+  const getOne{{pascalCase name}} = useGet{{pascalCase name}}ById({
+    filter: `_id=${(location.state as I{{pascalCase name}}sResponse)?._id}`,
+    search: "",
+    limit: 1,
+    offset: 0,
+    pageNavigationUrl: pageUrl,
+  });
+
+  useEffect(() => {
+    if ((location.state as I{{pascalCase name}}sResponse)._id) {
+      getOne{{pascalCase name}}.refetch();
+    }
+  }, [location.state]);
+
+  // ── Edit toggle ────────────────────────────────────
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+
+  function onClickCancel() {
+    setIsEdit(false);
+    formCreate{{pascalCase name}}.reset();
+  }
+
+  return (
+    <>
+      <LoadingOverlay visible={getOne{{pascalCase name}}.isLoading} />
+      <DetailLayout
+        identifier={location.state._id}
+        breadCrumbs={crumbItems}
+        isUsingAvatar={false}
+        title={getOne{{pascalCase name}}.data?.data?.data[0]?.name ?? "-"}
+        subtitleData={
+          <Text fz={12}>
+            <FormattedMessage id="caption{{pascalCase name}}" />
+          </Text>
+        }
+        isUsingTabs={false}
+        actions={[
+          {
+            isMenu: false,
+            label: <FormattedMessage id="edit" />,
+            props: {
+              size: "xs",
+              variant: "outline",
+              display:
+                isEdit ||
+                !hasAccess("/{{dashCase name}}/detail", "UPDATE")
+                  ? "none"
+                  : "",
+            },
+            onClick: () => setIsEdit(true),
+          },
+          {
+            isMenu: false,
+            label: <FormattedMessage id="cancel" />,
+            props: {
+              size: "xs",
+              variant: "outline",
+              display: !isEdit ? "none" : "",
+            },
+            onClick: () => onClickCancel(),
+          },
+          {
+            isMenu: false,
+            label: <FormattedMessage id="save" />,
+            props: {
+              size: "xs",
+              variant: "fill",
+              display: !isEdit ? "none" : "",
+              rightSection: update{{pascalCase name}}.isPending ? <Loader size="xs" /> : undefined,
+              disabled: update{{pascalCase name}}.isPending,
+            },
+            onClick: () => {
+              update{{pascalCase name}}.mutate(formCreate{{pascalCase name}}.values, {
+                onSuccess: () => setIsEdit(false),
+              });
+            },
+          },
+        ]}
+        body={
+          <Text fz={12} c="dimmed">
+            Detail
+          </Text>
+        }
+      />
+    </>
+  );
+}
+
+export default Detail{{pascalCase name}};

@@ -1,0 +1,268 @@
+import {
+  Divider,
+  Group,
+  Text,
+  useMantineTheme,
+  Stack,
+  Title,
+  TextInput,
+  Button,
+} from "@mantine/core";
+import { useEffect, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
+import { FilterForm } from "../../../components/filterForm";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass, faPlus } from "@fortawesome/free-solid-svg-icons";
+import useAppRoute from "../../../config/appRoute";
+import { useMediaQuery } from "@mantine/hooks";
+import { useContextMenu } from "mantine-contextmenu";
+import { DataTableColumn } from "mantine-datatable";
+import TableComponent from "../../../components/TableComponent";
+import { useAccessControl } from "../../../hooks/checkAuthRules/useAccessControl";
+import Crumbs from "../../../components/crumbs";
+import { IBreadCrumbsProps } from "../../../layouts/DetailLayout/types";
+import { IAppFormConfig } from "../../../components/appForm";
+import { I{{pascalCase name}}sResponse } from "../types/{{camelCase name}}.types";
+import { useGet{{pascalCase name}}s } from "../hooks/useGet{{pascalCase name}}s";
+import { use{{pascalCase name}}State } from "../states/use{{pascalCase name}}State";
+import useDebounce from "../../../hooks/useDebounce";
+import { useUrlFilter } from "../../../lib";
+
+function {{pascalCase name}}MainPage() {
+  const intl = useIntl();
+  const { go } = useAppRoute();
+  const theme = useMantineTheme();
+  const isTouch = useMediaQuery("(pointer: coarse)")!;
+  const { showContextMenu } = useContextMenu();
+  const { hasAccess } = useAccessControl();
+  const [records, setRecords] = useState<any[]>([]);
+  const [metadata, setMetadata] = useState<any>(null);
+
+  // rename biar gak bentrok dengan setFilter dari state
+  const { getFilter, setFilter: setUrlFilter, setFilters: setUrlFilters } = useUrlFilter();
+
+  // ── State dari states/ ─────────────────────────────
+  const {
+    limit,
+    setLimit,
+    offset,
+    setOffset,
+    search,
+    setSearch,
+    filter,
+    setFilter,
+    formFilter,
+    formCreate{{pascalCase name}},
+  } = use{{pascalCase name}}State();
+
+  // ── Restore dari URL on mount ──────────────────────
+  useEffect(() => {
+    const q = getFilter("search");
+    if (q) setSearch(q);
+    const f = getFilter("filter");
+    if (f) setFilter(f);
+  }, []);
+
+  // ── Search form ────────────────────────────────────
+  const formSearch = {
+    values: { q: search ?? "" },
+    setFieldValue: (_: string, val: string) => {
+      setSearch(val || null);
+      setUrlFilter("search", val);
+    },
+  };
+
+  // ── Pagination ─────────────────────────────────────
+  const pageSize = [50, 100, 150, 200, 250, 300];
+  const safeLimit = limit ?? pageSize[0];
+  const current = safeLimit > 0 ? Math.floor(offset / safeLimit) + 1 : 1;
+
+  const setCurrent = (page: number) => setOffset(safeLimit * (page - 1));
+  const setSize = (newSize: number) => {
+    setLimit(newSize);
+    setOffset(0);
+  };
+
+  // ── Filter payload ─────────────────────────────────
+  const filterPayload = filter;
+  const setFilterPayload = (val: string | null) => {
+    setFilter(val);                    // update state
+    setUrlFilter("filter", val ?? ""); // update URL
+  };
+
+  // ── Breadcrumbs ────────────────────────────────────
+  const crumbs: IBreadCrumbsProps[] = [
+    {
+      label: intl.formatMessage({ defaultMessage: "Dashboard", id: "dashboard" }),
+      onClick: () => go("/"),
+    },
+    {
+      label: intl.formatMessage({
+        defaultMessage: "{{titleCase name}}",
+        id: "{{camelCase name}}",
+      }),
+      onClick: () => go("/{{dashCase name}}"),
+    },
+  ];
+
+  // ── Filter form config ─────────────────────────────
+  const formFilterConfig: IAppFormConfig[] = [
+    {
+      fieldname: "status",
+      label: <FormattedMessage id="status" />,
+      type: "select",
+      placeholder: intl.formatMessage({ defaultMessage: "Status", id: "status" }),
+      data: [
+        // TODO: add your filter options here
+      ],
+    },
+  ];
+
+  // ── Data fetching ──────────────────────────────────
+  const get{{pascalCase name}}s = useGet{{pascalCase name}}s({
+    limit: safeLimit,
+    offset,
+    search: search ?? undefined,
+    filter: filterPayload ?? undefined,
+  });
+
+  const dbFetch = useDebounce(get{{pascalCase name}}s.refetch);
+
+  useEffect(() => {
+    dbFetch();
+  }, [search, filterPayload, current, limit]);
+
+  useEffect(() => {
+    setOffset(0);
+  }, [limit]);
+
+  useEffect(() => {
+    if (get{{pascalCase name}}s.data) {
+      setRecords(get{{pascalCase name}}s.data?.data?.data);
+      setMetadata(get{{pascalCase name}}s.data?.data?.pagination_metadata);
+    }
+  }, [get{{pascalCase name}}s.data]);
+
+  // ── Filter submit ──────────────────────────────────
+  async function onSubmitFilter() {
+    const values = formFilter.values;
+    setUrlFilters({
+      status: values.status ?? "",
+      // tambah field filter lain di sini
+    });
+    setFilterPayload(JSON.stringify(values));
+  }
+
+  // ── Styles ─────────────────────────────────────────
+  const pointerStyle = { cursor: "pointer" };
+  const createBtnStyle = hasAccess("/{{dashCase name}}", "CREATE") ? {} : { display: "none" as const };
+
+  // ── Table columns ──────────────────────────────────
+  const columns: DataTableColumn<I{{pascalCase name}}sResponse>[] = [
+    {
+      accessor: "_id",
+      title: (
+        <Text fz={12} fw={700}>
+          <FormattedMessage id="id" />
+        </Text>
+      ),
+      render: (record) => (
+        <Text fz={10} c="primary" ta="left" style={pointerStyle}>
+          {record._id}
+        </Text>
+      ),
+    },
+    // TODO: add more columns here
+  ];
+
+  return (
+    <>
+      <Stack>
+        <Crumbs breadCrumbs={crumbs} />
+        <Stack gap={0}>
+          <Title size={26}>
+            <FormattedMessage id="{{camelCase name}}" />
+          </Title>
+          <Text fz={12}>
+            <FormattedMessage id="listAllOf{{pascalCase name}}" />
+          </Text>
+        </Stack>
+        <Divider />
+        <Group justify="space-between">
+          <Group justify="left">
+            <TextInput
+              size="xs"
+              leftSection={<FontAwesomeIcon icon={faMagnifyingGlass} size="xs" />}
+              placeholder={intl.formatMessage({ defaultMessage: "Search...", id: "search" })}
+              value={formSearch.values.q}
+              onChange={(event) => formSearch.setFieldValue("q", event.currentTarget.value)}
+            />
+            <FilterForm
+              displayHeader={false}
+              config={formFilterConfig}
+              formSearch={formSearch as any}
+              formFilter={formFilter}
+              onResetFilter={() => {
+                formFilter.reset();
+                setFilterPayload(null);
+                setUrlFilters({ status: "", filter: "", search: "" });
+                setSearch(null);
+              }}
+              onSubmit={() => onSubmitFilter()}
+              popover
+            />
+          </Group>
+          <Button
+            size="xs"
+            leftSection={<FontAwesomeIcon icon={faPlus} />}
+            style={createBtnStyle}
+            // onClick={() => {}}
+          >
+            <Text fz={12} fw={600}>
+              <FormattedMessage id="create{{pascalCase name}}" />
+            </Text>
+          </Button>
+        </Group>
+
+        <TableComponent
+          columns={columns}
+          records={records}
+          fetching={get{{pascalCase name}}s.isLoading}
+          isSelection={false}
+          height={"69vh"}
+          isExpansion={false}
+          isTouch={isTouch}
+          isContextMenu={false}
+          isCellContextMenu={true}
+          cellContextMenu={({ record, column, event }) => {
+            if (column.accessor === "_id") {
+              return showContextMenu([
+                {
+                  key: "detail",
+                  title: (
+                    <Text fz={12}>
+                      <FormattedMessage id="openDetail" />
+                    </Text>
+                  ),
+                  style: { width: 150 },
+                  onClick: () => {
+                    go("/{{dashCase name}}/detail", { state: record });
+                  },
+                },
+              ])(event);
+            }
+          }}
+          isUsingPagination={true}
+          totalRecords={metadata?.total_records ?? 0}
+          recordPerPage={safeLimit}
+          page={current}
+          recordsPerPageOptions={pageSize}
+          onRecordsPerPageChange={(value) => setSize(value)}
+          onPageChange={(page) => setCurrent(page)}
+        />
+      </Stack>
+    </>
+  );
+}
+
+export default {{pascalCase name}}MainPage;

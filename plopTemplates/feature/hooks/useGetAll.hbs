@@ -1,0 +1,7 @@
+import { createListQuery } from "../../../lib";
+import { getAll{{pascalCase name}}s } from "../api/getAll{{pascalCase name}}s";
+
+export const useGet{{pascalCase name}}s = createListQuery(
+  "{{camelCase name}}s",
+  getAll{{pascalCase name}}s
+);

@@ -1,0 +1,6 @@
+import { AxiosResponse } from "axios";
+import { axios } from "../../../config/axios";
+
+export const delete{{pascalCase name}} = (id: string): Promise<AxiosResponse<any>> => {
+  return axios.delete(`/{{camelCase name}}s/${id}`);
+};

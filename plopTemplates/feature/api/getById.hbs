@@ -1,0 +1,29 @@
+import { AxiosResponse } from "axios";
+import { axios } from "../../../config/axios";
+import { buildQueryParams } from "../../../lib";
+
+interface IFetch{{pascalCase name}}ByIdParams {
+  limit?: number;
+  offset?: number;
+  search?: string;
+  filter?: string;
+  pageNavigationUrl?: string;
+}
+
+export const get{{pascalCase name}}ById = async (
+  params: IFetch{{pascalCase name}}ByIdParams,
+): Promise<AxiosResponse<any>> => {
+  try {
+    const finalUrl = buildQueryParams("{{camelCase name}}s", params);
+    const res = await axios.get(finalUrl);
+    return res;
+  } catch (error: any) {
+    if (error.response) {
+      return Promise.reject(error.response);
+    } else if (error.request) {
+      return Promise.reject(error.request);
+    } else {
+      return Promise.reject(error.message);
+    }
+  }
+};
